@@ -3,6 +3,9 @@ package main
 import (
 	"errors"
 	"net/http"
+	"slices"
+
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,8 +17,7 @@ type note struct {
 }
 
 var notes = []note{
-	{ID: "1", Title: "Homework", Body: "Math\nScience\nOrchestra"},
-}
+	{ID: "1", Title: "Homework", Body: "Math Science Orchestra"}}
 
 // create note with new note data
 func createNote(c *gin.Context) {
@@ -29,19 +31,23 @@ func createNote(c *gin.Context) {
 	c.IndentedJSON(http.StatusCreated, newNote)
 }
 
-func noteByID(c *gin.Context) {
-	id := c.Param("id")
-	note, err := getNoteByID(id)
+func noteByTitle(c *gin.Context) {
+	title := c.Param("title")
+	note, err := getNoteByTitle(title, false)
 	if err != nil {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "Note not found."})
 	}
 	c.IndentedJSON(http.StatusOK, note)
 }
 
-func getNoteByID(id string) (*note, error) {
+func getNoteByTitle(title string, delete bool) (*note, error) {
 	for i, n := range notes {
-		if n.ID == id {
-			return &notes[i], nil
+		if strings.EqualFold(n.Title, title) {
+			foundNote := &notes[i]
+			if delete {
+				notes = slices.Delete(notes, i, i+1)
+			}
+			return foundNote, nil
 		}
 	}
 	return nil, errors.New("note not found")
@@ -51,10 +57,20 @@ func getNotes(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, notes)
 }
 
+func deleteNote(c *gin.Context) {
+	title := c.Param("title")
+	note, err := getNoteByTitle(title, true)
+	if err != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "Note not found."})
+	}
+	c.IndentedJSON(http.StatusOK, note)
+}
+
 func main() {
 	router := gin.Default()
 	router.POST("/notes", createNote)
 	router.GET("/notes", getNotes)
-	router.GET("/notes/:id", noteByID)
+	router.GET("/notes/:title", noteByTitle)
+	router.DELETE("/notes/:title", deleteNote)
 	router.Run("localhost:8080")
 }
