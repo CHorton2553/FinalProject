@@ -50,7 +50,7 @@ func getNote(title string) {
 	}
 	var data note
 	json.Unmarshal(responseData, &data)
-	fmt.Print(data)
+	fmt.Println(data)
 }
 
 func post() {
@@ -77,6 +77,7 @@ func post() {
 	}
 
 	s := string(body)
+	fmt.Print("Posted: ")
 	fmt.Println(s)
 }
 
@@ -110,7 +111,7 @@ func deleteNote(title string) {
 func main() {
 	post()
 	getNotes()
-	// getNote("Fun Fact")
+	getNote("Fun Fact")
 	deleteNote("Fun Fact")
 	getNotes()
 }
