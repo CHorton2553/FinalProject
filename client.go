@@ -108,10 +108,49 @@ func deleteNote(id string) {
 	fmt.Println("Deleted: ", data)
 }
 
+func editNote(id string) {
+	// simulate user inputed update
+	updatedNote := note{ID: "1", Body: "Math=Done Science Orchestra"}
+	bodyBytes, err := json.Marshal(&updatedNote)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	requestBody := bytes.NewReader(bodyBytes)
+
+	// create patch request
+	client := http.DefaultClient
+	request, err := http.NewRequest(http.MethodPatch, BASE_URL+"/notes/"+id, requestBody)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	// send patch request
+	response, err := client.Do(request)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	defer response.Body.Close()
+	responseData, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	var note note
+	json.Unmarshal(responseData, &note)
+	fmt.Println("Updated: ", note)
+
+}
+
 func main() {
 	post()
 	getNotes()
 	getNote("2")
 	deleteNote("2")
+	getNotes()
+	editNote("1")
 	getNotes()
 }

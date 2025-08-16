@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"slices"
 
-	"strings"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -41,8 +39,8 @@ func noteByID(c *gin.Context) {
 }
 
 func getNoteByID(id string, delete bool) (*note, error) {
-	for i, n := range notes {
-		if strings.EqualFold(n.ID, id) {
+	for i, note := range notes {
+		if note.ID == id {
 			foundNote := &notes[i]
 			if delete {
 				deletedNote := notes[i]
@@ -69,15 +67,29 @@ func deleteNote(c *gin.Context) {
 }
 
 func editNote(c *gin.Context) {
-	// id := c.Param("id")
-
+	id := c.Param("id")
+	// bind json input to updatedNote
 	var updatedNote note
-
 	if err := c.BindJSON(&updatedNote); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
+	// find the note int notes by id
+	for i, note := range notes {
+		if note.ID == id {
+			// Update the fields that were provided in request
+			if updatedNote.Title != "" {
+				notes[i].Title = updatedNote.Title
+			}
+			if updatedNote.Body != "" {
+				notes[i].Body = updatedNote.Body
+			}
+			c.JSON(http.StatusOK, notes[i])
+			return
+		}
+	}
+	c.JSON(http.StatusNotFound, gin.H{"message": "Note not found"})
 }
 
 func main() {
@@ -86,6 +98,6 @@ func main() {
 	router.GET("/notes", getNotes)
 	router.GET("/notes/:id", noteByID)
 	router.DELETE("/notes/:id", deleteNote)
-	router.PATCH("/notes:id", editNote)
+	router.PATCH("/notes/:id", editNote)
 	router.Run("localhost:8080")
 }
