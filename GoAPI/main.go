@@ -67,6 +67,14 @@ func deleteNote(c *gin.Context) {
 }
 
 func editNote(c *gin.Context) {
+	title := c.Param("title")
+
+	var updatedNote note
+
+	if err := c.BindJSON(&updatedNote); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 }
 
