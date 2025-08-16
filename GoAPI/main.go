@@ -31,21 +31,23 @@ func createNote(c *gin.Context) {
 	c.IndentedJSON(http.StatusCreated, newNote)
 }
 
-func noteByTitle(c *gin.Context) {
-	title := c.Param("title")
-	note, err := getNoteByTitle(title, false)
+func noteByID(c *gin.Context) {
+	id := c.Param("id")
+	note, err := getNoteByID(id, false)
 	if err != nil {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "Note not found."})
 	}
 	c.IndentedJSON(http.StatusOK, note)
 }
 
-func getNoteByTitle(title string, delete bool) (*note, error) {
+func getNoteByID(id string, delete bool) (*note, error) {
 	for i, n := range notes {
-		if strings.EqualFold(n.Title, title) {
+		if strings.EqualFold(n.ID, id) {
 			foundNote := &notes[i]
 			if delete {
+				deletedNote := notes[i]
 				notes = slices.Delete(notes, i, i+1)
+				return &deletedNote, nil
 			}
 			return foundNote, nil
 		}
@@ -58,8 +60,8 @@ func getNotes(c *gin.Context) {
 }
 
 func deleteNote(c *gin.Context) {
-	title := c.Param("title")
-	note, err := getNoteByTitle(title, true)
+	id := c.Param("id")
+	note, err := getNoteByID(id, true)
 	if err != nil {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "Note not found."})
 	}
@@ -67,7 +69,7 @@ func deleteNote(c *gin.Context) {
 }
 
 func editNote(c *gin.Context) {
-	title := c.Param("title")
+	// id := c.Param("id")
 
 	var updatedNote note
 
@@ -82,8 +84,8 @@ func main() {
 	router := gin.Default()
 	router.POST("/notes", createNote)
 	router.GET("/notes", getNotes)
-	router.GET("/notes/:title", noteByTitle)
-	router.DELETE("/notes/:title", deleteNote)
-	router.PATCH("/notes:title", editNote)
+	router.GET("/notes/:id", noteByID)
+	router.DELETE("/notes/:id", deleteNote)
+	router.PATCH("/notes:id", editNote)
 	router.Run("localhost:8080")
 }

@@ -36,8 +36,8 @@ func getNotes() {
 
 }
 
-func getNote(title string) {
-	response, err := http.Get(BASE_URL + "/notes/" + title)
+func getNote(id string) {
+	response, err := http.Get(BASE_URL + "/notes/" + id)
 	if err != nil {
 		fmt.Println(err.Error())
 		return
@@ -81,10 +81,10 @@ func post() {
 	fmt.Println(s)
 }
 
-func deleteNote(title string) {
+func deleteNote(id string) {
 	// create delete request
 	client := http.DefaultClient
-	request, err := http.NewRequest(http.MethodDelete, BASE_URL+"/notes/"+title, nil)
+	request, err := http.NewRequest(http.MethodDelete, BASE_URL+"/notes/"+id, nil)
 	if err != nil {
 		fmt.Println(err.Error())
 		return
@@ -111,7 +111,7 @@ func deleteNote(title string) {
 func main() {
 	post()
 	getNotes()
-	getNote("Fun Fact")
-	deleteNote("Fun Fact")
+	getNote("2")
+	deleteNote("2")
 	getNotes()
 }
