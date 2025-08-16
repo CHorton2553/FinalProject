@@ -66,11 +66,16 @@ func deleteNote(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, note)
 }
 
+func editNote(c *gin.Context) {
+
+}
+
 func main() {
 	router := gin.Default()
 	router.POST("/notes", createNote)
 	router.GET("/notes", getNotes)
 	router.GET("/notes/:title", noteByTitle)
 	router.DELETE("/notes/:title", deleteNote)
+	router.PATCH("/notes:title", editNote)
 	router.Run("localhost:8080")
 }
