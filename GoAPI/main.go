@@ -96,7 +96,7 @@ func editNote(c *gin.Context) {
 func main() {
 	router := gin.Default()
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowOrigins:     []string{"http://127.0.0.1:5500"},
 		AllowMethods:     []string{"PUT", "PATCH", "POST", "DELETE", "GET"},
 		AllowHeaders:     []string{"Content-Type"},
 		AllowCredentials: true,
