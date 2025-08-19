@@ -1,15 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Note Taker</title>
-    <link rel="stylesheet" href="style.css"/>
-</head>
-<body>
-    <h1>Notes from API</h1>
-    <h3 id="test"></h3>
-    <button id="getNote"  >Get note</button>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="items">
+      <div class="library">
+        <h3>Notes</h3>
+        <ul id="listOfNotes"></ul>
+      </div>
+      <div class="displayedNote">
+        <form id="note-form" onsubmit="submitHandler(event)">
+          <textarea
+            type="text"
+            id="note-title"
+            name="note-title"
+            placeholder="Note Title"
+            form="note-form"
+          ></textarea>
+          <br />
+          <textarea
+            type="text"
+            id="note-body"
+            name=" note-body"
+            placeholder="Note Body"
+            form="note-form"
+          ></textarea>
+        </form>
+        <button id="submit-button" form="note-form" value="0">Submit</button>
+      </div>
+    </div>
     <script type="module" src="script.js"></script>
-</body>
+  </body>
 </html>

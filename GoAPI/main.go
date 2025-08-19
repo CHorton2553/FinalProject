@@ -16,7 +16,8 @@ type note struct {
 }
 
 var notes = []note{
-	{ID: "1", Title: "Homework", Body: "Math Science Orchestra"}}
+	{ID: "1", Title: "Homework", Body: "Math, Science, Orchestra"},
+	{ID: "2", Title: "Fun Fact", Body: "Jack is a big boy"}}
 
 // create note with new note data
 func createNote(c *gin.Context) {
@@ -76,14 +77,14 @@ func editNote(c *gin.Context) {
 		return
 	}
 
-	// find the note int notes by id
+	// find the note in notes by id
 	for i, note := range notes {
 		if note.ID == id {
 			// Update the fields that were provided in request
 			if updatedNote.Title != "" {
 				notes[i].Title = updatedNote.Title
 			}
-			if updatedNote.Body != "" {
+			if len(updatedNote.Body) != 0 {
 				notes[i].Body = updatedNote.Body
 			}
 			c.JSON(http.StatusOK, notes[i])
