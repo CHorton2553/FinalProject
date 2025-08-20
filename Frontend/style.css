@@ -16,6 +16,7 @@
   border-radius: 2.5px;
   margin: 2%;
   padding: 10px;
+  font-size: 18px;
   /* background-color: red; */
 }
 
@@ -36,6 +37,17 @@
 .displayedNote button {
   display: flex;
   flex-direction: column;
-  align-items: left;
-  width: 10%;
+  align-items: center;
+  width: 15%;
+}
+
+textarea {
+  width: 500px;
+  min-height: 100px;
+  padding: 8px;
+  font-size: 18px;
+  resize: none;
+  border: solid 1px;
+  border-radius: 3px;
+  outline: none;
 }
