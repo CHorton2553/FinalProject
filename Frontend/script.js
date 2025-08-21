@@ -1,4 +1,5 @@
 const BASE_URL = "http://localhost:8080";
+var selectedNote = { id: "0", title: "", body: "" };
 
 // get list of notes for library list
 const results = await fetch(BASE_URL + "/notes")
@@ -8,32 +9,51 @@ const results = await fetch(BASE_URL + "/notes")
 // add note titles to library list for display
 const libraryUL = document.getElementById("listOfNotes");
 results.forEach((item) => {
-  const li = document.createElement("li");
+  var li = document.createElement("li");
+  li.id = `${item.id}`;
   li.textContent = `${item.title}`;
   libraryUL.appendChild(li);
 });
+console.log("Notes from api:", results);
+console.log("Selected note at top:", selectedNote);
+
+// reset selectedNote
+function resetSelectedNote() {
+  selectedNote.id = "0";
+  selectedNote.title = "";
+  selectedNote.body = "";
+}
 
 // add eventlistener to ul for a click on note title
 libraryUL.addEventListener("click", function (event) {
-  console.log(event.target.innerHTML);
   results.forEach((item) => {
-    if (event.target.innerHTML == item.title) {
-      console.log(item.id);
-      document.getElementById("note-title").value = `${item.title}`;
-      document.getElementById("note-body").value = `${item.body}`;
-      document.getElementById("submit-button").innerHTML = "Save"; // indicate to save changes
-      document.getElementById("submit-button").value = `${item.id}`; // save the id of note in button value
+    if (event.target.id == item.id) {
+      // make and print to console this item
+      const id = item.id;
+      const title = item.title;
+      const body = item.body;
+      selectedNote = { id, title, body };
+      console.log("Selected note:", selectedNote);
+
+      // set the textareas to note values for display
+      document.getElementById("note-title").value = `${title}`;
+      document.getElementById("note-body").value = `${body}`;
+      document.getElementById("submit-button").innerHTML = "Save";
     }
   });
 });
 
-// add eventlistener to newNote button to reset text fields
-const newNoteButton = document.getElementById("newNote");
-newNoteButton.addEventListener("click", function (event) {
+// add eventlistener to resetNote button to reset text fields
+const resetNoteButton = document.getElementById("resetNote");
+resetNoteButton.addEventListener("click", function (event) {
+  // reset textareas to null
   document.getElementById("note-title").value = null;
   document.getElementById("note-body").value = null;
+
+  // reset the selected note
+  resetSelectedNote();
   document.getElementById("submit-button").innerHTML = "Submit";
-  document.getElementById("submit-button").value = "0";
+  console.log("Reset selected note:", selectedNote);
 });
 
 // submit button handler
@@ -41,26 +61,24 @@ document.getElementById("note-form").onsubmit = function submitHandler(event) {
   const formData = new FormData(event.target);
   const noteTitle = formData.get("note-title");
   const noteBody = formData.get("note-body");
-  var noteID = document.getElementById("submit-button").value;
 
-  if (noteID == 0) {
+  if (selectedNote.id == 0) {
     // Post new note
-    noteID = results.length + 1;
+    let noteID = results.length + 1;
     createNote(noteID, noteTitle, noteBody);
   } else {
-    // make the note to edit
-    const newNote = { noteID, noteTitle, noteBody };
+    // Edit selected note
+    let noteID = selectedNote.id;
     editNote(noteID, noteTitle, noteBody);
   }
   document.getElementById("submit-button").innerHTML = "Submit";
-  document.getElementById("submit-button").value = "0";
 };
 
 // POST NEW NOTE
-async function createNote(id, title, body) {
+async function createNote(idPass, title, body) {
   // make the new note
-  const noteID = id.toString();
-  const newNote = { noteID, title, body };
+  const id = idPass.toString();
+  const newNote = { id, title, body };
   console.log("New Note:", newNote);
 
   // Send post request with newNote
@@ -73,6 +91,8 @@ async function createNote(id, title, body) {
   })
     .then((data) => data.json())
     .then((data) => data);
+  console.log("Create Note is complete");
+  console.log(result);
 }
 
 // PATCH EDIT NOTE
