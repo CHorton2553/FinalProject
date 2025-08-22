@@ -1,12 +1,12 @@
 const BASE_URL = "http://localhost:8080";
 var selectedNote = { id: "0", title: "", body: "" };
 
-// get list of notes for library list
+// GET REQUEST
 const results = await fetch(BASE_URL + "/notes")
   .then((data) => data.json())
   .then((data) => data);
 
-// add note titles to library list for display
+// DISPLAY NOTES
 const libraryUL = document.getElementById("listOfNotes");
 results.forEach((item) => {
   var li = document.createElement("li");
@@ -17,14 +17,17 @@ results.forEach((item) => {
 console.log("Notes from api:", results);
 console.log("Selected note at top:", selectedNote);
 
-// reset selectedNote
+// UPDATE DISPLAYED LIBRARY
+function updateLibrary() {}
+
+// RESET NOTE
 function resetSelectedNote() {
   selectedNote.id = "0";
   selectedNote.title = "";
   selectedNote.body = "";
 }
 
-// add eventlistener to ul for a click on note title
+// UL EVENT LISTENER
 libraryUL.addEventListener("click", function (event) {
   results.forEach((item) => {
     if (event.target.id == item.id) {
@@ -43,7 +46,25 @@ libraryUL.addEventListener("click", function (event) {
   });
 });
 
-// add eventlistener to resetNote button to reset text fields
+// SUBMIT BUTTON HANDLER
+document.getElementById("note-form").onsubmit = function submitHandler(event) {
+  const formData = new FormData(event.target);
+  const noteTitle = formData.get("note-title");
+  const noteBody = formData.get("note-body");
+
+  if (selectedNote.id == 0) {
+    // Post new note
+    console.log("Selected Note id:", selectedNote.id);
+    createNote(noteTitle, noteBody);
+  } else {
+    // Edit selected note
+    let noteID = selectedNote.id;
+    editNote(noteID, noteTitle, noteBody);
+  }
+  document.getElementById("submit-button").innerHTML = "Submit";
+};
+
+// RESET NOTE TEXTAREAS
 const resetNoteButton = document.getElementById("resetNote");
 resetNoteButton.addEventListener("click", function (event) {
   // reset textareas to null
@@ -56,55 +77,53 @@ resetNoteButton.addEventListener("click", function (event) {
   console.log("Reset selected note:", selectedNote);
 });
 
-// submit button handler
-document.getElementById("note-form").onsubmit = function submitHandler(event) {
-  const formData = new FormData(event.target);
-  const noteTitle = formData.get("note-title");
-  const noteBody = formData.get("note-body");
-
-  if (selectedNote.id == 0) {
-    // Post new note
-    let noteID = results.length + 1;
-    createNote(noteID, noteTitle, noteBody);
-  } else {
-    // Edit selected note
-    let noteID = selectedNote.id;
-    editNote(noteID, noteTitle, noteBody);
-  }
-  document.getElementById("submit-button").innerHTML = "Submit";
-};
-
-// POST NEW NOTE
-async function createNote(idPass, title, body) {
-  // make the new note
-  const id = idPass.toString();
-  const newNote = { id, title, body };
-  console.log("New Note:", newNote);
-
-  // Send post request with newNote
-  const result = await fetch(BASE_URL + "/notes", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(newNote),
-  })
-    .then((data) => data.json())
-    .then((data) => data);
-  console.log("Create Note is complete");
-  console.log(result);
+// GET NEW ID
+function getNewId() {
+  var maxID = 0;
+  results.forEach((item) => {
+    var id = Number(item.id);
+    if (id >= maxID) {
+      maxID = item.id;
+    }
+  });
+  maxID++;
+  console.log("New ID:", maxID);
+  return maxID;
 }
 
-// PATCH EDIT NOTE
-async function editNote(id, title, body) {
-  // reset
+// POST REQUEST
+async function createNote(title, body) {
+  // make the new note
+  const id = getNewId().toString();
+  const newNote = { id, title, body };
+  console.log("New Note:", newNote);
+  try {
+    // Send post request with newNote
+    const result = await fetch(BASE_URL + "/notes", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newNote),
+    })
+      .then((data) => data.json())
+      .then((data) => data);
+    console.log("Create Note is complete");
+    console.log(result);
+  } catch (error) {
+    console.error(error.message);
+  }
+}
+
+// PATCH REQUEST
+async function editNote(idPass, title, body) {
   // create the modified note
-  const noteID = id.toString();
-  const modifiedNote = { noteID, title, body };
+  const id = idPass.toString();
+  const modifiedNote = { id, title, body };
   console.log("Modified Note:", modifiedNote);
 
   // send patch request with modifiedNote
-  const result = await fetch(BASE_URL + "/notes/" + noteID, {
+  const result = await fetch(BASE_URL + "/notes/" + id, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -113,17 +132,38 @@ async function editNote(id, title, body) {
   })
     .then((data) => data.json())
     .then((data) => data);
+  console.log(result);
 }
 
-/*
-const results = await fetch(BASE_URL + "/notes")
-  .then((data) => data.json())
-  .then((data) => data);
-*/
-// async function getNote(title) {
-//   const resultNote = await fetch("http://localhost:8080/notes/" + id)
-//     .then((data) => data.json())
-//     .then((data) => data);
-//   document.getElementById("test").innerHTML =
-//     resultNote.title + ": " + resultNote.body;
-// }
+// DELETE NOTE LISTENER
+const deleteNoteButton = document.getElementById("deleteNote");
+deleteNoteButton.addEventListener("click", function () {
+  if (selectedNote.id == 0) {
+    return;
+  } else {
+    deleteNote();
+  }
+});
+
+// DELETE REQUEST
+async function deleteNote() {
+  // make the note to delete
+  const deletedNote = {
+    id: selectedNote.id,
+    title: selectedNote.title,
+    body: selectedNote.body,
+  };
+
+  // send delete with note to delete
+  const result = await fetch(BASE_URL + "/notes/" + selectedNote.id, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(deletedNote),
+  })
+    .then((data) => data.json())
+    .then((data) => data);
+
+  window.location.reload();
+}

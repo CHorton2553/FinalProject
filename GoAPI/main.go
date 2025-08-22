@@ -16,8 +16,9 @@ type note struct {
 }
 
 var notes = []note{
-	{ID: "1", Title: "Homework", Body: "Math, Science, Orchestra"},
-	{ID: "2", Title: "Fun Fact", Body: "Jack is a big boy"}}
+	// {ID: "1", Title: "Homework", Body: "Math, Science, Orchestra"},
+	// {ID: "2", Title: "Fun Fact", Body: "Jack is a big boy"},
+}
 
 // create note with new note data
 func createNote(c *gin.Context) {
@@ -61,6 +62,9 @@ func getNotes(c *gin.Context) {
 
 func deleteNote(c *gin.Context) {
 	id := c.Param("id")
+	if id == "0" {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "Note ID is 0."})
+	}
 	note, err := getNoteByID(id, true)
 	if err != nil {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "Note not found."})
